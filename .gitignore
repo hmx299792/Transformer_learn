@@ -1,0 +1,18 @@
+# Python 虚拟环境
+.venv/
+venv/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# Jupyter 自动生成文件
+.ipynb_checkpoints/
+
+# 编辑器配置（按需保留）
+.vscode/
+
+# 模型训练与输出（重要！你缺少了这些）
+runs/
+weights/
+NEW/
