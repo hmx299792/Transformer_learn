@@ -156,12 +156,15 @@ def train_model(config):
     initial_epoch = 0
     global global_step
     global_step = 0
+    
     #第N轮出问题了在这一轮处重新来（设置个存档点），不必完全从头来过
     if config['preload']:
         model_filename = get_weights_file_path(config, config['preload'])
         print(f'预加载模型：{model_filename}')
         state = torch.load(model_filename) #torch.load和torch.save相反
         initial_epoch = state['epoch'] + 1
+
+        model.load_state_dict(state['model_state_dict'])
         optimizer.load_state_dict(state['optimizer_state_dict']) #恢复优化器状态
 
     #计算交叉熵损失：1.忽略 padding token，不计算梯度；2.标签平滑，防止过拟合：从[一个1其它全0]的 独热编码 转变成[一个接近1的数，其余很小数] 软标签 
@@ -207,7 +210,7 @@ def train_model(config):
         run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
         #print_msg(...) 括号里的字符串，会成为 lambda 的 msg，然后被 batch_iterator.write(msg) 打印到进度条下方。
 
-        #每轮结束后保存模型
+        #每轮结束后保存模型数据
         model_filename = get_weights_file_path(config, f'{epoch:02d}')
         torch.save({
             'epoch': epoch,
