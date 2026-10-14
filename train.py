@@ -6,7 +6,7 @@ from dataset import BilingualDataset, causal_mask
 from Transformer import build_transformer
 from config import get_config, get_weights_file_path
 
-from datasets import load_dataset
+from datasets import load_dataset #从 Hugging Face 的 datasets 库中导入 load_dataset 函数，用于加载数据集
 from tokenizers import Tokenizer
 from tokenizers.models import WordLevel
 from tokenizers.trainers import WordLevelTrainer
@@ -198,7 +198,8 @@ def train_model(config):
             loss.backward()
 
             #更新权重
-            optimizer.step() #用梯度更新，沿着梯度反方向
+            optimizer.step() #用梯度更新参数（沿着梯度反方向）
+            
             optimizer.zero_grad() #清空梯度，为下一步准备
 
             global_step += 1
