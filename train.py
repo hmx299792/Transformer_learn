@@ -89,8 +89,8 @@ def get_or_build_tokenizer(config, ds, lang): #config：字典，用来存放配
         tokenizer = Tokenizer(WordLevel(unk_token='[UNK]')) #WordLevel：闭词表模型
         tokenizer.pre_tokenizer = Whitespace()
         #min_frequency只管普通词，大于等于这个频率的才进入词表；特殊词保送进词表
-        trainer = WordLevelTrainer(special_tokens = ['[UNK]', '[PAD]', '[SOS]', '[EOS]'], min_frequency = 2) #超过特定频率的词进入分词器，构建词表
-        tokenizer.train_from_iterator(get_all_sentences(ds, lang), trainer=trainer) #train_from_iterator：从一段"数据流"（迭代器）上训练分词器
+        trainer = WordLevelTrainer(special_tokens = ['[UNK]', '[PAD]', '[SOS]', '[EOS]'], min_frequency = 2) #制定词表构建规则 超过特定频率的词才能进入分词器
+        tokenizer.train_from_iterator(get_all_sentences(ds, lang), trainer=trainer) #train_from_iterator：从一段"数据流"（迭代器）上训练分词器，构建词表
         tokenizer.save(str(tokenizer_path))
     else:
         tokenizer = Tokenizer.from_file(str(tokenizer_path))
@@ -110,14 +110,16 @@ def get_ds(config):
     val_ds_size = len(ds_raw) - train_ds_size
     train_ds_raw, val_ds_raw = random_split(ds_raw, [train_ds_size, val_ds_size])
 
+    #原始数据经过BilingualDataset类处理后，变成了一个个的字典，字典里有编码器输入、解码器输入、标签、掩码等
     train_ds = BilingualDataset(train_ds_raw, tokenizer_src, tokenizer_tgt, config['lang_src'], config['lang_tgt'], config['seq_len'])
     val_ds = BilingualDataset(val_ds_raw, tokenizer_src, tokenizer_tgt, config['lang_src'], config['lang_tgt'], config['seq_len'])
 
     max_len_src = 0
     max_len_tgt = 0
 
+    #遍历整个原始数据集，统计源语言和目标语言中最长句子的 token 数量（可重复）
     for item in ds_raw:
-        src_ids = tokenizer_src.encode(item['translation'][config['lang_src']]) #语句变id
+        src_ids = tokenizer_src.encode(item['translation'][config['lang_src']]) # Encoding 对象
         tgt_ids = tokenizer_tgt.encode(item['translation'][config['lang_tgt']])
         max_len_src = max(max_len_src, len(src_ids))
         max_len_tgt = max(max_len_tgt, len(tgt_ids))
