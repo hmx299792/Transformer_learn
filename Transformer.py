@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import math
 
-#输入嵌入
+#进行输入嵌入
 class InputEmbeddings(nn.Module):
 
     def __init__(self,d_model:int,vocab_size:int) -> None:
