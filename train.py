@@ -150,7 +150,7 @@ def train_model(config):
     train_dataloader, val_dataloader, tokenizer_src, tokenizer_tgt = get_ds(config)
     model = get_model(config, tokenizer_src.get_vocab_size(), tokenizer_tgt.get_vocab_size()).to(device) #把模型搬到cuda上
     #Tensorboard
-    writer = SummaryWriter(config['experiment_name']) #把“这次实验的名字”当成文件夹名，用来存日志
+    writer = SummaryWriter(config['experiment_name']) #保存runs/tmodel；把“这次实验的名字”当成文件夹名，用来存日志
 
     #创建优化器，用 Adam 算法来更新模型参数
     optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'], eps=1e-9)
@@ -193,7 +193,10 @@ def train_model(config):
 
             loss = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label.view(-1))
             # (B, Seq_Len, tgt_vocab_size) --> (B * Seq_Len, tgt_vocab_size)
+            # (B, Seq_Len) --> (B * Seq_Len)
+
             batch_iterator.set_postfix({f"loss": f"{loss.item():6.3f}"}) #loss.item()从只包含一个元素的张量中取出 Python 标量值的方法
+            # .set_postfix(...):在进度条的右侧（postfix 区域）显示附加信息
 
             #记录损失
             writer.add_scalar('train loss', loss.item(), global_step) #把 loss 写入 TensorBoard，记录成曲线，标签是 'train loss'，横轴是 global_step
