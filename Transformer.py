@@ -6,7 +6,7 @@ import math
 class InputEmbeddings(nn.Module):
 
     def __init__(self,d_model:int,vocab_size:int) -> None:
-        super().__init__()
+        super().__init__() #调用父类nn.Module的构造方法
         self.d_model=d_model
         self.vocab_size=vocab_size
         self.embedding=nn.Embedding(vocab_size,d_model)
